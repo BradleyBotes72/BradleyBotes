@@ -1,5 +1,6 @@
 {
   "scriptFile": "__init__.py",
+  "entryPoint": "parse_pdf_invoice",
   "bindings": [
     {
       "name": "blob",

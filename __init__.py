@@ -1022,14 +1022,27 @@ async def save_logging(invoice_json: Dict[str, Any], status: str,
         # Don't fail the entire process if logging fails
 
 
-# Azure Function app configuration
-app = func.FunctionApp()
-
-@app.blob_trigger(arg_name="blob", 
-                  path="incoming-invoices/{name}",
-                  connection="AzureWebJobsStorage")
-async def invoice_processor(blob: func.InputStream) -> None:
+# Azure Function v1 entry point
+async def parse_pdf_invoice(blob: func.InputStream) -> None:
     """
     Azure Function triggered by blob upload to 'incoming-invoices' container.
+    This is the entry point for the v1 programming model.
     """
     await main(blob)
+
+
+# Azure Function v2 entry point (alternative)
+# Uncomment the following lines if you want to use the v2 programming model
+# and remove the function.json file
+
+# app = func.FunctionApp()
+
+# @app.blob_trigger(arg_name="blob", 
+#                   path="incoming-invoices/{name}",
+#                   connection="AzureWebJobsStorage")
+# async def invoice_processor(blob: func.InputStream) -> None:
+#     """
+#     Azure Function triggered by blob upload to 'incoming-invoices' container.
+#     This is the entry point for the v2 programming model.
+#     """
+#     await main(blob)
