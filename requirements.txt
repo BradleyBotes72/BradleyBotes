@@ -1,0 +1,10 @@
+azure-functions>=1.20.0
+azure-ai-formrecognizer>=3.3.2
+azure-core>=1.30.0
+python-dateutil>=2.9.0
+requests>=2.32.3
+azure-functions>=1.20.0
+azure-ai-formrecognizer>=3.3.2
+azure-core>=1.30.0
+python-dateutil>=2.9.0
+requests>=2.32.3
