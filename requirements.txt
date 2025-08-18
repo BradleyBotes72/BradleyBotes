@@ -1,0 +1,7 @@
+azure-functions==1.18.0
+azure-storage-blob==12.19.0
+azure-ai-formrecognizer==3.3.2
+lxml==4.9.3
+httpx==0.25.2
+openai==0.28.1
+python-dateutil==2.8.2
