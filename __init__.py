@@ -48,6 +48,27 @@ async def main(blob: func.InputStream) -> None:
     try:
         logger.info(f"Processing invoice: {blob.name}")
         
+        # Check for required environment variables
+        missing_vars = []
+        if not AZURE_STORAGE_CONNECTION_STRING:
+            missing_vars.append("AZURE_STORAGE_CONNECTION_STRING")
+        if not BC_CLIENT_SECRET:
+            missing_vars.append("BC_CLIENT_SECRET")
+            
+        if missing_vars:
+            error_msg = f"Missing required environment variables: {', '.join(missing_vars)}"
+            logger.error(error_msg)
+            # Save error log even if some env vars are missing
+            error_json = {
+                'original_filename': blob.name,
+                'processing_timestamp': datetime.datetime.utcnow().isoformat(),
+                'error': error_msg,
+                'error_type': 'EnvironmentError'
+            }
+            if AZURE_STORAGE_CONNECTION_STRING:  # Only try to save if we have storage connection
+                await save_logging(error_json, "Failed")
+            return
+        
         # Read blob content
         file_bytes = blob.read()
         file_name = blob.name
@@ -55,6 +76,9 @@ async def main(blob: func.InputStream) -> None:
         
         # Determine file type and parse accordingly
         if file_extension == 'pdf':
+            if not FORM_RECOGNIZER_KEY or not FORM_RECOGNIZER_ENDPOINT:
+                logger.warning("Form Recognizer credentials not available, skipping PDF parsing")
+                raise ValueError("PDF processing requires FORM_RECOGNIZER_KEY and FORM_RECOGNIZER_ENDPOINT")
             invoice_json = await parse_pdf_invoice(file_bytes)
         elif file_extension == 'xml':
             invoice_json = await parse_xml_invoice(file_bytes)
@@ -67,7 +91,14 @@ async def main(blob: func.InputStream) -> None:
         
         # Load GL mappings and enrich with AI
         gl_mappings = await load_gl_mappings()
-        invoice_json = await determine_gl_accounts(invoice_json, gl_mappings)
+        if OPENAI_API_KEY:
+            invoice_json = await determine_gl_accounts(invoice_json, gl_mappings)
+        else:
+            logger.warning("OpenAI API key not available, using default GL accounts")
+            # Apply default GL accounts
+            default_gl = gl_mappings.get('default_gl_account', '40000')
+            for line_item in invoice_json.get('line_items', []):
+                line_item['gl_account'] = default_gl
         
         # Get Business Central token
         token = await get_bc_token()
@@ -953,6 +984,10 @@ async def save_logging(invoice_json: Dict[str, Any], status: str,
     Save processing log to blob storage.
     """
     try:
+        if not AZURE_STORAGE_CONNECTION_STRING:
+            logger.warning("No storage connection string available, cannot save logs")
+            return
+            
         blob_service_client = azure.storage.blob.BlobServiceClient.from_connection_string(
             AZURE_STORAGE_CONNECTION_STRING
         )
@@ -966,7 +1001,7 @@ async def save_logging(invoice_json: Dict[str, Any], status: str,
         
         # Generate unique blob name
         timestamp = datetime.datetime.utcnow().strftime('%Y%m%d_%H%M%S')
-        original_name = invoice_json.get('original_filename', 'unknown')
+        original_name = invoice_json.get('original_filename', 'unknown').replace('/', '_').replace('\\', '_')
         blob_name = f"{timestamp}_{original_name}_{status.lower()}.json"
         
         blob_client = blob_service_client.get_blob_client(
