@@ -1,0 +1,61 @@
+{
+  "default_gl_account": "40000",
+  "mappings": {
+    "office supplies": "61000",
+    "stationery": "61000",
+    "paper": "61000",
+    "pens": "61000",
+    "computer": "12000",
+    "laptop": "12000",
+    "software": "62000",
+    "license": "62000",
+    "consulting": "63000",
+    "professional services": "63000",
+    "legal": "63100",
+    "accounting": "63200",
+    "travel": "64000",
+    "hotel": "64100",
+    "flight": "64200",
+    "taxi": "64300",
+    "fuel": "65000",
+    "gasoline": "65000",
+    "diesel": "65000",
+    "maintenance": "66000",
+    "repair": "66000",
+    "cleaning": "67000",
+    "utilities": "68000",
+    "electricity": "68100",
+    "water": "68200",
+    "gas": "68300",
+    "internet": "68400",
+    "phone": "68500",
+    "rent": "70000",
+    "lease": "70000",
+    "insurance": "71000",
+    "marketing": "72000",
+    "advertising": "72000",
+    "training": "73000",
+    "education": "73000",
+    "meals": "74000",
+    "catering": "74000",
+    "subscription": "75000"
+  },
+  "vendor_mappings": {
+    "Microsoft": {
+      "default_gl": "62000",
+      "keywords": {
+        "Office 365": "62100",
+        "Azure": "62200",
+        "Windows": "62300"
+      }
+    },
+    "Amazon": {
+      "default_gl": "61000",
+      "keywords": {
+        "AWS": "62200",
+        "EC2": "62200",
+        "S3": "62200"
+      }
+    }
+  }
+}
